@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { Schedule, DAYS, ClassSession, ScheduleTheme } from '../types';
-import { AlertTriangle, Clock, MapPin, User } from 'lucide-react';
+import { AlertTriangle, Clock, MapPin, User, Building2 } from 'lucide-react';
 
 interface ScheduleGridProps {
   schedule: Schedule;
@@ -192,6 +192,14 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({ schedule, isGuest, onResolv
                           </span>
                           {session.conflict && <AlertTriangle size={12 * fontScale} className="text-destructive shrink-0 ml-1" />}
                         </div>
+
+                        {/* Specific Faculty Display */}
+                        {session.subject_faculty && (
+                           <div className="flex items-center gap-1 mb-1 opacity-90 truncate" style={{ fontSize: `${detailsFontSize - 1}px` }} title={session.subject_faculty}>
+                             <Building2 size={(detailsFontSize - 1)} className="shrink-0 text-accent" />
+                             <span className="truncate font-medium text-accent/90">{session.subject_faculty}</span>
+                           </div>
+                        )}
                         
                         <div className="flex items-center gap-1 opacity-90 mt-auto" style={{ fontSize: `${detailsFontSize}px` }}>
                           <Clock size={12 * fontScale} className="shrink-0 hidden md:block" />

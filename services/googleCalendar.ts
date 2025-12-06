@@ -125,7 +125,7 @@ export const syncScheduleToCalendar = async (
     let eventCount = 0;
 
     schedule.sessions.forEach((session) => {
-      if (session.type === 'Unknown' || session.conflict) return; // Skip conflicts or unknown
+      if (session.conflict) return; // Skip conflicts
 
       const firstDate = getFirstDateOfDay(semesterStart, session.day);
       
@@ -142,9 +142,9 @@ export const syncScheduleToCalendar = async (
       endDateTime.setHours(endH, endM, 0);
 
       const event = {
-        summary: `${session.subject} (${session.type.substring(0,1)})`,
+        summary: session.subject,
         location: session.location,
-        description: `Docente: ${session.teacher}\nTipo: ${session.type}`,
+        description: `Docente: ${session.teacher}`,
         start: {
           dateTime: startDateTime.toISOString(),
           timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,

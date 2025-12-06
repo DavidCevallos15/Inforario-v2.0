@@ -32,6 +32,11 @@ const FeatureCard = ({ icon, title, description }: { icon: React.ReactNode, titl
   );
 };
 
+// Define cleanUserId function at the top
+const cleanUserId = (id: string): string => {
+  return id.startsWith('TU') ? id.substring(2) : id;
+};
+
 function AnimatedHeroTitle() {
   const [titleNumber, setTitleNumber] = useState(0);
   const titles = useMemo(
@@ -131,14 +136,15 @@ const App: React.FC = () => {
     const initAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
+          const cleanId = cleanUserId(session.user.id);
           const userData = { 
-            id: session.user.id, 
+            id: cleanId, 
             email: session.user.email!, 
             full_name: session.user.user_metadata?.full_name 
           };
           setUser(userData);
           setSession(session);
-          fetchSchedules(session.user.id);
+          fetchSchedules(cleanId);
       }
     };
     initAuth();
@@ -147,12 +153,13 @@ const App: React.FC = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       if (session?.user) {
+        const cleanId = cleanUserId(session.user.id);
         setUser({ 
-          id: session.user.id, 
+          id: cleanId, 
           email: session.user.email!,
           full_name: session.user.user_metadata?.full_name 
         });
-        fetchSchedules(session.user.id);
+        fetchSchedules(cleanId);
       } else {
         setUser(null);
         setSavedSchedules([]);
@@ -676,7 +683,7 @@ const App: React.FC = () => {
         }
 
         // Draw Text inside Box - SCALED
-        const titleFontSize = 7 * fontScale;
+        const titleFontSize = 10 * fontScale; // Increased from 7
         doc.setFontSize(titleFontSize);
         doc.setFont(style.font, "bold");
         
@@ -687,12 +694,24 @@ const App: React.FC = () => {
         const subjectLines = doc.splitTextToSize(session.subject, dayColWidth - 5);
         doc.text(subjectLines, textX, textY);
         
-        textY += (subjectLines.length * (titleFontSize / 2)); // Dynamic line height approx
+        textY += (subjectLines.length * (titleFontSize / 2)) + 0.5; // Adjusted spacing
         
-        const detailsFontSize = 6 * fontScale;
+        const detailsFontSize = 8 * fontScale; // Increased from 6
         doc.setFont(style.font, "normal");
         doc.setFontSize(detailsFontSize);
         
+        // Add Subject Faculty (if exists) - NEW FEATURE
+        if (session.subject_faculty) {
+          doc.setFont(style.font, "italic");
+          doc.setFontSize(detailsFontSize - 1);
+          // Truncate if too long to keep neat
+          const facultyText = session.subject_faculty.length > 30 ? session.subject_faculty.substring(0, 27) + '...' : session.subject_faculty;
+          doc.text(facultyText, textX, textY);
+          textY += (detailsFontSize / 2) + 0.5;
+          doc.setFont(style.font, "normal");
+          doc.setFontSize(detailsFontSize);
+        }
+
         doc.text(`${session.startTime} - ${session.endTime}`, textX, textY);
         textY += (detailsFontSize / 2) + 0.5;
         

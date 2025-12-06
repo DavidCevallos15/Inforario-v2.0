@@ -9,12 +9,13 @@ export interface UserProfile {
 export interface ClassSession {
   id: string;
   subject: string;
+  subject_faculty?: string; // 👈 NUEVO: Facultad específica de la materia
   day: 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday';
   startTime: string; // HH:mm format
   endTime: string; // HH:mm format
   teacher: string;
   location: string;
-  type: 'Teoría' | 'Práctica' | 'Unknown';
+  // Se eliminó la propiedad 'type' ('Teoría' | 'Práctica' | 'Unknown')
   color?: string;
   conflict?: boolean;
 }
@@ -23,7 +24,7 @@ export interface Schedule {
   id?: string;
   title: string;
   academic_period?: string;
-  faculty?: string;
+  faculty?: string; // Se mantiene la facultad principal del horario (de la carrera)
   sessions: ClassSession[];
   lastUpdated: Date;
 }

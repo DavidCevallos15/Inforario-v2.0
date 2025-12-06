@@ -56,6 +56,7 @@ const ScheduleList: React.FC<ScheduleListProps> = ({
   };
 
   const handleDeleteClick = (e: React.MouseEvent, id: string) => {
+    e.preventDefault();
     e.stopPropagation();
     onDelete(id);
   };
@@ -197,7 +198,8 @@ const ScheduleList: React.FC<ScheduleListProps> = ({
                 <div className="flex items-center gap-1">
                    <button 
                     onClick={(e) => handleDeleteClick(e, schedule.id)}
-                    className="p-2.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
+                    type="button"
+                    className="p-2.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors z-20"
                     title="Eliminar horario"
                    >
                      <Trash2 size={18} />
@@ -205,7 +207,8 @@ const ScheduleList: React.FC<ScheduleListProps> = ({
 
                    <button 
                     onClick={(e) => { e.stopPropagation(); onOpen(schedule.id); }}
-                    className="hidden sm:block px-6 py-2 bg-card border border-muted text-foreground font-semibold rounded-lg hover:bg-muted transition-all text-sm"
+                    type="button"
+                    className="hidden sm:block px-6 py-2 bg-card border border-muted text-foreground font-semibold rounded-lg hover:bg-muted transition-all text-sm z-20"
                    >
                      Abrir
                    </button>

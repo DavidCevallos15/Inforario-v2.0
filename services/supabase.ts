@@ -14,10 +14,51 @@ const activeKey = customKey || DEFAULT_SUPABASE_KEY;
 // Robust initialization: fallback to a dummy object if keys are missing to prevent white-screen crashes.
 const isConfigured = activeUrl && activeKey && !activeUrl.includes("placeholder");
 
-export const supabase = isConfigured 
-  ? createClient(activeUrl, activeKey)
-  : {
-      from: () => ({ select: () => ({ eq: () => ({ single: () => Promise.resolve({ error: { message: "No connection" } }) }) }) }),
+// Dummy builder that allows chaining for any operation without crashing
+// Prevents "Script error" if .delete() is called on an unconfigured client
+const createDummyBuilder = () => {
+  const errorResult = { data: null, error: { message: "Database not configured" } };
+  const promise = Promise.resolve(errorResult);
+  
+  const builder: any = {
+    select: () => builder,
+    insert: () => builder,
+    update: () => builder,
+    delete: () => builder,
+    eq: () => builder,
+    neq: () => builder,
+    gt: () => builder,
+    lt: () => builder,
+    gte: () => builder,
+    lte: () => builder,
+    in: () => builder,
+    is: () => builder,
+    like: () => builder,
+    ilike: () => builder,
+    contains: () => builder,
+    match: () => builder,
+    order: () => builder,
+    limit: () => builder,
+    single: () => promise,
+    maybeSingle: () => promise,
+    // Complete Promise Interface to ensure await works correctly
+    then: (onfulfilled?: (value: any) => any, onrejected?: (reason: any) => any) => promise.then(onfulfilled, onrejected),
+    catch: (onrejected?: (reason: any) => any) => promise.catch(onrejected),
+    finally: (onfinally?: (() => void) | null) => promise.finally(onfinally)
+  };
+  return builder;
+};
+
+let client;
+try {
+  client = isConfigured ? createClient(activeUrl, activeKey) : null;
+} catch (e) {
+  console.warn("Supabase client initialization failed:", e);
+  client = null;
+}
+
+export const supabase = client || {
+      from: () => createDummyBuilder(),
       auth: {
         getSession: () => Promise.resolve({ data: { session: null }, error: null }),
         onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
@@ -30,7 +71,7 @@ export const supabase = isConfigured
     } as any;
 
 export const isSupabaseConfigured = () => {
-  return !!isConfigured;
+  return !!client;
 };
 
 export const saveSupabaseConfig = (url: string, key: string) => {
@@ -117,12 +158,25 @@ export const getScheduleById = async (scheduleId: string) => {
 export const deleteSchedule = async (scheduleId: string) => {
   if (!isSupabaseConfigured()) return;
 
-  const { error } = await supabase
-    .from('schedules')
-    .delete()
-    .eq('id', scheduleId);
+  try {
+    const { error } = await supabase
+      .from('schedules')
+      .delete()
+      .eq('id', scheduleId);
 
-  if (error) throw error;
+    if (error) throw error;
+  } catch (err: any) {
+    console.error("Delete error:", err);
+    // Handle Supabase "Invalid login credentials" which happens if the user was deleted or token revoked
+    if (err.message && (err.message.includes("Invalid login credentials") || err.message.includes("JWT"))) {
+        throw new Error("Credenciales inválidas o sesión expirada. Por favor cierra sesión y vuelve a ingresar.");
+    }
+    // Handle generic Script error (CORS/Network issues often masked as Script error)
+    if (err.message === "Script error.") {
+        throw new Error("Error de conexión. Por favor verifica tu internet o intenta más tarde.");
+    }
+    throw err;
+  }
 };
 
 export const getUserProfile = async (userId: string): Promise<UserProfile | null> => {
