@@ -1,0 +1,234 @@
+:root {
+  --bg: #0A0E27;
+  --fg: #E0E7FF;
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+:root {
+  --bg: #0A0E27;
+  --fg: #E0E7FF;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+  background-color: var(--bg);
+  color: var(--fg);
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Reduce animations globally to prioritize responsiveness */
+/* Light default transitions; respect user preference for reduced motion */
+* {
+  transition-property: background-color, color, border-color, opacity, transform;
+  transition-duration: 280ms;
+  transition-timing-function: cubic-bezier(.2,.8,.2,1);
+}
+
+/* Utility to tighten hero spacing */
+.hero-tight {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+/* Small typography adjustments */
+h1 { line-height: 1.05; }
+
+/* Make images and canvas scale nicely */
+img, canvas { max-width: 100%; height: auto; display: block; }
+
+/* Prefer reduced motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+
+/* CSS Background beams and dots */
+.css-bg { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.css-bg .vignette { position: absolute; inset: 0; background: radial-gradient(ellipse at center, rgba(10,14,39,0) 0%, rgba(10,14,39,0.6) 70%); pointer-events: none; }
+.beam {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(40px);
+  opacity: 0.55;
+  transform: translate3d(0,0,0);
+  animation: beam-move 25s linear infinite;
+}
+
+@keyframes beam-move {
+  0% { transform: translateY(-10%) rotate(0deg) scale(1); }
+  50% { transform: translateY(8%) rotate(20deg) scale(1.05); }
+  100% { transform: translateY(-10%) rotate(0deg) scale(1); }
+}
+
+.dot-grid {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 24px 24px;
+  opacity: 0.4;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+/* Hero title CSS animation replacements */
+.title-overlay { position: absolute; inset: 0; display:flex; align-items:center; justify-content:center; pointer-events:none; z-index: 10; }
+.title-item { 
+  position: absolute; 
+  left: 0; 
+  width: 100%; 
+  text-align: center; 
+  white-space: nowrap; 
+  font-weight: 800; 
+  background-image: linear-gradient(to right, #22d3ee, #a855f7);
+  background-clip: text; 
+  -webkit-background-clip: text; 
+  -webkit-text-fill-color: transparent;
+  color: transparent; 
+  transition: transform 520ms cubic-bezier(.2,.9,.3,1), opacity 300ms ease; 
+}
+.title-item.active { transform: translateY(0%); opacity: 1; }
+.title-item.up { transform: translateY(-100%); opacity: 0; }
+.title-item.down { transform: translateY(100%); opacity: 0; }
+
+/* Progress bar animations */
+@keyframes progress-slide {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.progress-anim {
+  background-image: linear-gradient(90deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 50%, rgba(255,255,255,0.06) 100%), linear-gradient(90deg, var(--tw-gradient-stops));
+  background-size: 200% 100%, 100% 100%;
+  background-position: 0 0, 0 0;
+  animation: progress-slide 1.6s linear infinite;
+}
+
+.progress-pulse {
+  animation: pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.95; }
+  50% { opacity: 1; }
+  100% { opacity: 0.95; }
+}
+
+/* RGB animated border for cards */
+@keyframes rgb-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.rgb-border {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  padding: 1px; /* border thickness */
+  background: linear-gradient(90deg, #00F0FF, #7C3AED, #FF006E, #FFBE0B, #00F0FF);
+  background-size: 200% 200%;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0.06;
+  transition: opacity 220ms ease, transform 220ms ease;
+}
+
+.group\/card:hover .rgb-border {
+  opacity: 1;
+  animation: rgb-shift 3s linear infinite;
+  transform: translateZ(0);
+}
+
+/* Fallback simpler thin line for browsers that don't support mask compositing */
+@supports not ((-webkit-mask-composite: xor) or (mask-composite: exclude)) {
+  .rgb-border {
+    background: transparent;
+  }
+  .rgb-border::after {
+    content: '';
+    position: absolute; inset: 0; border-radius: inherit;
+    box-shadow: inset 0 0 0 1px rgba(0,240,255,0.08);
+    transition: box-shadow 220ms ease, opacity 220ms ease;
+    opacity: 0.8;
+  }
+  .group\/card:hover .rgb-border::after {
+    box-shadow: inset 0 0 0 1px rgba(255,0,150,0.28), inset 0 0 10px rgba(255,0,150,0.06);
+  }
+}
+
+
+/* Scrollbar tweaks */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: #1E2749; }
+
+.group\/card:hover .rgb-border {
+  opacity: 1;
+  animation: rgb-shift 3s linear infinite;
+  transform: translateZ(0);
+}
+
+/* Fallback simpler thin line for browsers that don't support mask compositing */
+@supports not ((-webkit-mask-composite: xor) or (mask-composite: exclude)) {
+  .rgb-border {
+    background: transparent;
+  }
+  .rgb-border::after {
+    content: '';
+    position: absolute; inset: 0; border-radius: inherit;
+    box-shadow: inset 0 0 0 1px rgba(0,240,255,0.08);
+    transition: box-shadow 220ms ease, opacity 220ms ease;
+    opacity: 0.8;
+  }
+  .group\/card:hover .rgb-border::after {
+    box-shadow: inset 0 0 0 1px rgba(255,0,150,0.28), inset 0 0 10px rgba(255,0,150,0.06);
+  }
+}
+
+
+/* Scrollbar tweaks */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: #1E2749; }
+
+@keyframes rgb-move {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.rgb-border-container {
+  position: relative;
+  border-radius: 1rem;
+  padding: 2px; /* The width of the border */
+  overflow: hidden;
+}
+
+.rgb-border-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(60deg, #ff0000, #00ff00, #0000ff, #ff0000, #00ff00, #0000ff);
+  background-size: 300% 300%;
+  animation: rgb-move 4s ease infinite;
+  z-index: 0;
+}
+
+.rgb-border-content {
+  position: relative;
+  background: var(--bg); /* Or a slightly lighter dark color */
+  border-radius: calc(1rem - 2px);
+  padding: 1.5rem;
+  z-index: 1;
+  height: 100%;
+}
+
