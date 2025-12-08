@@ -54,35 +54,34 @@ function AnimatedHeroTitle() {
   return (
     <div className="w-full">
       <div className="container mx-auto">
-        <div className="flex gap-4 hero-tight items-center justify-center">
-          <h1 className="text-3xl md:text-5xl max-w-full tracking-tighter text-center font-extrabold inline-flex items-center gap-4 justify-center whitespace-nowrap overflow-visible">
+        <div className="flex gap-3 hero-tight items-center justify-center">
+          <h1 className="text-3xl md:text-5xl max-w-full tracking-tighter text-center font-extrabold inline-flex items-center gap-3 justify-center whitespace-nowrap overflow-visible">
             <span className="text-foreground inline-block">Gestión</span>
-            <motion.span 
+            
+            <motion.div 
               layout
-              transition={{ type: "spring", stiffness: 100, damping: 20 }}
-              className="font-extrabold inline-block pb-0 relative"
+              className="relative inline-flex flex-col items-center justify-center"
+              transition={{ type: "spring", stiffness: 200, damping: 30 }}
             >
-              {/* Texto invisible para reservar ancho exacto del título actual y evitar reflow */}
-              <span className="invisible select-none">{titles[titleNumber]}</span>
-
-              {/* Overlay absoluto que hace la animación centrada sobre el texto reservado */}
-              <span className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-                {titles.map((t, i) => (
-                  <span
-                    key={t}
-                    className={`absolute left-0 w-full text-center whitespace-nowrap font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-purple-500 transition-all duration-500 ease-out ${
-                      titleNumber === i 
-                        ? 'opacity-100 translate-y-0' 
-                        : titleNumber > i 
-                          ? 'opacity-0 -translate-y-full' 
-                          : 'opacity-0 translate-y-full'
-                    }`}
-                  >
-                    {t}
-                  </span>
-                ))}
-              </span>
-            </motion.span>
+                {/* Invisible text to drive the width */}
+                <span className="invisible select-none px-1">{titles[titleNumber]}</span>
+                
+                {/* Absolute overlay for the animation */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                    <AnimatePresence mode="popLayout">
+                        <motion.span
+                            key={titleNumber}
+                            initial={{ y: 40, opacity: 0, filter: "blur(10px)" }}
+                            animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
+                            exit={{ y: -40, opacity: 0, filter: "blur(10px)" }}
+                            transition={{ duration: 0.5, ease: "circOut" }}
+                            className="font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-purple-500 whitespace-nowrap pb-1"
+                        >
+                            {titles[titleNumber]}
+                        </motion.span>
+                    </AnimatePresence>
+                </div>
+            </motion.div>
           </h1>
         </div>
       </div>
