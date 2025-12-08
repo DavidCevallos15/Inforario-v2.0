@@ -66,12 +66,17 @@ function AnimatedHeroTitle() {
               <span className="invisible select-none">{titles[titleNumber]}</span>
 
               {/* Overlay absoluto que hace la animación centrada sobre el texto reservado */}
-              <span className="title-overlay">
+              <span className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
                 {titles.map((t, i) => (
                   <span
                     key={t}
-                    className={`title-item ${titleNumber === i ? 'active' : (titleNumber > i ? 'up' : 'down')} bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500`}
-                    style={{ willChange: 'transform, opacity' }}
+                    className={`absolute left-0 w-full text-center whitespace-nowrap font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-purple-500 transition-all duration-500 ease-out ${
+                      titleNumber === i 
+                        ? 'opacity-100 translate-y-0' 
+                        : titleNumber > i 
+                          ? 'opacity-0 -translate-y-full' 
+                          : 'opacity-0 translate-y-full'
+                    }`}
                   >
                     {t}
                   </span>
