@@ -75,7 +75,13 @@ function AnimatedHeroTitle() {
                             animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
                             exit={{ y: -40, opacity: 0, filter: "blur(10px)" }}
                             transition={{ duration: 0.5, ease: "circOut" }}
-                            className="font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-purple-500 whitespace-nowrap pb-1"
+                            className="font-extrabold whitespace-nowrap pb-1"
+                            style={{
+                              background: 'linear-gradient(to right, #22d3ee, #a855f7)',
+                              WebkitBackgroundClip: 'text',
+                              WebkitTextFillColor: 'transparent',
+                              backgroundClip: 'text'
+                            }}
                         >
                             {titles[titleNumber]}
                         </motion.span>
