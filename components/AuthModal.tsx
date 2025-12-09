@@ -80,8 +80,19 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLogin }) => {
         if (!isPasswordValid) {
           throw new Error("La contraseña no cumple con los requisitos.");
         }
-        await signUpWithEmail(email, password, fullName);
-        setSuccessMsg("¡Cuenta creada! Revisa tu correo para confirmar.");
+        const result = await signUpWithEmail(email, password, fullName);
+        
+        // Check if email confirmation is required
+        if (result?.user && !result.session) {
+          setSuccessMsg("¡Cuenta creada exitosamente! 📧 Revisa tu correo (incluyendo spam) para confirmar tu cuenta antes de iniciar sesión.");
+        } else if (result?.session) {
+          // Auto-login if confirmation disabled
+          setSuccessMsg("¡Cuenta creada y sesión iniciada exitosamente!");
+          setTimeout(() => {
+            onLogin();
+            onClose();
+          }, 1500);
+        }
       } else if (view === 'FORGOT_PASSWORD') {
         await resetPasswordForEmail(email);
         setSuccessMsg("Si el correo existe, recibirás un enlace de recuperación.");
@@ -92,6 +103,10 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLogin }) => {
         setError("Este correo ya está registrado. Por favor, inicia sesión.");
       } else if (err.message.includes("Invalid login")) {
         setError("Credenciales incorrectas.");
+      } else if (err.message.includes("Email not confirmed")) {
+        setError("⚠️ Debes confirmar tu email antes de iniciar sesión. Revisa tu bandeja de entrada (y spam).");
+      } else if (err.message.includes("email_confirmation_required")) {
+        setError("⚠️ Por favor confirma tu email antes de continuar. Revisa tu correo.");
       } else {
         setError(err.message || "Ocurrió un error. Inténtalo de nuevo.");
       }
