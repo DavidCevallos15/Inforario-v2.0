@@ -1,39 +1,14 @@
-@import "tailwindcss";
-
 :root {
   --bg: #0A0E27;
   --fg: #E0E7FF;
-  
-  /* Tailwind v4 Custom Colors */
-  --color-background: #0A0E27;
-  --color-foreground: #E0E7FF;
-  --color-card: #151B3B;
-  --color-card-foreground: #E0E7FF;
-  --color-popover: #151B3B;
-  --color-popover-foreground: #E0E7FF;
-  --color-primary: #00F0FF;
-  --color-primary-foreground: #0A0E27;
-  --color-secondary: #FF006E;
-  --color-secondary-foreground: #FFFFFF;
-  --color-muted: #1E2749;
-  --color-muted-foreground: #8B92B0;
-  --color-accent: #FFBE0B;
-  --color-accent-foreground: #0A0E27;
-  --color-destructive: #FF006E;
-  --color-destructive-foreground: #FFFFFF;
-  --color-border: #1E2749;
-  --color-border-glow: #00F0FF;
-  --color-input: #151B3B;
-  --color-ring: #00F0FF;
-  --color-utm: #00F0FF;
-  --color-conflict: #FF006E;
-  
-  /* Tailwind v4 Custom Animations */
-  --animate-first: moveVertical 30s ease infinite;
-  --animate-second: moveInCircle 20s reverse infinite;
-  --animate-third: moveInCircle 40s linear infinite;
-  --animate-fourth: moveHorizontal 40s ease infinite;
-  --animate-fifth: moveInCircle 20s ease infinite;
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+:root {
+  --bg: #0A0E27;
+  --fg: #E0E7FF;
 }
 
 html, body, #root {

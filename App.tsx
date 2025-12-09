@@ -52,7 +52,7 @@ function AnimatedHeroTitle() {
   }, [titles]);
 
   return (
-    <div className="w-full">
+    <div className="w-full relative z-10">
       <div className="container mx-auto">
         <div className="flex gap-3 hero-tight items-center justify-center">
           <h1 className="text-3xl md:text-5xl max-w-full tracking-tighter text-center font-extrabold inline-flex items-center gap-3 justify-center whitespace-nowrap overflow-visible">
@@ -60,14 +60,14 @@ function AnimatedHeroTitle() {
             
             <motion.div 
               layout
-              className="relative inline-flex flex-col items-center justify-center"
+              className="relative inline-flex flex-col items-center justify-center min-w-[200px] md:min-w-[400px]"
               transition={{ type: "spring", stiffness: 200, damping: 30 }}
             >
                 {/* Invisible text to drive the width */}
-                <span className="invisible select-none px-1">{titles[titleNumber]}</span>
+                <span className="invisible select-none px-1 font-extrabold">{titles[titleNumber]}</span>
                 
                 {/* Absolute overlay for the animation */}
-                <div className="absolute inset-0 flex items-center justify-center">
+                <div className="absolute inset-0 flex items-center justify-center z-20">
                     <AnimatePresence mode="popLayout">
                         <motion.span
                             key={titleNumber}
@@ -75,9 +75,9 @@ function AnimatedHeroTitle() {
                             animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
                             exit={{ y: -40, opacity: 0, filter: "blur(10px)" }}
                             transition={{ duration: 0.5, ease: "circOut" }}
-                            className="font-extrabold whitespace-nowrap pb-1"
+                            className="font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-500 whitespace-nowrap pb-1 relative z-20"
                             style={{
-                              background: 'linear-gradient(to right, #22d3ee, #a855f7)',
+                              backgroundImage: 'linear-gradient(to right, #22d3ee, #60a5fa, #a855f7)',
                               WebkitBackgroundClip: 'text',
                               WebkitTextFillColor: 'transparent',
                               backgroundClip: 'text'
