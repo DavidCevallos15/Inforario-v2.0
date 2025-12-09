@@ -58,8 +58,8 @@ function AnimatedHeroTitle() {
           <h1 className="text-3xl md:text-5xl max-w-full tracking-tighter text-center font-extrabold inline-flex items-center gap-3 justify-center whitespace-nowrap overflow-visible">
             <span className="text-foreground inline-block">Gestión</span>
 
-            {/* Versión ultra simple y siempre visible del subtítulo dinámico */}
-            <span className="font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-purple-500">
+            {/* Subtítulo dinámico visible siempre, en blanco para máximo contraste */}
+            <span className="inline-block text-foreground">
               {titles[titleNumber]}
             </span>
           </h1>
