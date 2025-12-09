@@ -57,11 +57,31 @@ function AnimatedHeroTitle() {
         <div className="flex gap-3 hero-tight items-center justify-center">
           <h1 className="text-3xl md:text-5xl max-w-full tracking-tighter text-center font-extrabold inline-flex items-center gap-3 justify-center whitespace-nowrap overflow-visible">
             <span className="text-foreground inline-block">Gestión</span>
-
-            {/* Subtítulo dinámico visible siempre, en blanco para máximo contraste */}
-            <span className="inline-block text-foreground">
-              {titles[titleNumber]}
-            </span>
+            
+            <motion.div 
+              layout
+              className="relative inline-flex flex-col items-center justify-center"
+              transition={{ type: "spring", stiffness: 200, damping: 30 }}
+            >
+                {/* Invisible text to drive the width */}
+                <span className="invisible select-none px-1">{titles[titleNumber]}</span>
+                
+                {/* Absolute overlay for the animation */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                    <AnimatePresence mode="popLayout">
+                        <motion.span
+                            key={titleNumber}
+                            initial={{ y: 40, opacity: 0, filter: "blur(10px)" }}
+                            animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
+                            exit={{ y: -40, opacity: 0, filter: "blur(10px)" }}
+                            transition={{ duration: 0.5, ease: "circOut" }}
+                            className="font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-purple-500 whitespace-nowrap pb-1"
+                        >
+                            {titles[titleNumber]}
+                        </motion.span>
+                    </AnimatePresence>
+                </div>
+            </motion.div>
           </h1>
         </div>
       </div>
