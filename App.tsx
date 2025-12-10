@@ -17,6 +17,7 @@ import ConfirmResetModal from './components/ConfirmResetModal';
 import CustomizerSidebar from './components/CustomizerSidebar';
 import AuthModal from './components/AuthModal';
 import ScheduleList from './components/ScheduleList';
+import ResetPasswordPage from './components/ResetPasswordPage';
 import { EvervaultCard } from './components/ui/evervault-card';
 import './globals.css';
 
@@ -132,7 +133,18 @@ const App: React.FC = () => {
   // Auth Modal State
   const [authModalOpen, setAuthModalOpen] = useState(false);
 
+  // Password Recovery Mode State
+  const [isPasswordRecoveryMode, setIsPasswordRecoveryMode] = useState(false);
+
   // UI Actions Menu State removed (direct download button)
+
+  // Check for password recovery mode from URL hash (Supabase redirects with #access_token=...&type=recovery)
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash && hash.includes('type=recovery')) {
+      setIsPasswordRecoveryMode(true);
+    }
+  }, []);
 
   // Auth Listener
   useEffect(() => {
@@ -1104,6 +1116,25 @@ const App: React.FC = () => {
       {/* Calendar Sync removed */}
     </div>
   );
+
+  // Handle password recovery completion
+  const handlePasswordRecoveryComplete = async () => {
+    setIsPasswordRecoveryMode(false);
+    // Clear the URL hash
+    window.history.replaceState(null, '', window.location.pathname);
+    // Sign out to force re-login with new password
+    await supabase.auth.signOut();
+    // Reset user state
+    setUser(null);
+    setSession(null);
+    // Open the login modal automatically
+    setAuthModalOpen(true);
+  };
+
+  // If in password recovery mode, show the reset password page
+  if (isPasswordRecoveryMode) {
+    return <ResetPasswordPage onComplete={handlePasswordRecoveryComplete} />;
+  }
 
   return (
     <div className="relative min-h-screen w-full text-white overflow-hidden selection:bg-indigo-500 selection:text-white">
