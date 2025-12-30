@@ -5,6 +5,7 @@ module.exports = {
     './src/**/*.{js,ts,jsx,tsx}',
     './components/**/*.{ts,tsx,js,jsx}'
   ],
+  plugins: [require("tailwindcss-animate")],
   theme: {
     extend: {
       colors: {
@@ -60,5 +61,4 @@ module.exports = {
       },
     },
   },
-  plugins: [],
 };
