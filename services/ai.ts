@@ -55,7 +55,7 @@ export const parseScheduleFile = async (base64Data: string, mimeType: string): P
     const response = useNewApi
       ? await (async () => {
           const model = (ai as any).getGenerativeModel({
-            model: "gemini-2.5-flash",
+            model: "gemini-1.5-flash",
             generationConfig: {
               responseMimeType: "application/json",
               responseSchema: {
@@ -96,7 +96,7 @@ export const parseScheduleFile = async (base64Data: string, mimeType: string): P
         })()
       : await (async () => {
           const result = await (ai as any).models.generateContent({
-            model: "gemini-2.5-flash",
+            model: "gemini-1.5-flash",
             contents: {
               parts: [
                 { inlineData: { mimeType, data: cleanBase64 } },
