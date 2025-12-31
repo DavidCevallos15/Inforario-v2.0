@@ -40,8 +40,8 @@ export const parseScheduleFile = async (base64Data: string, mimeType: string): P
     throw new Error("Falta la clave API de Gemini.");
   }
 
-  // Initialize client here to avoid top-level ReferenceError if process is not defined during module load
-  const ai = new GoogleGenAI({ apiKey });
+  // Initialize client correctly with the string API_KEY
+  const ai = new GoogleGenAI(apiKey);
 
   // Remove data URL prefix (works for image/* and application/pdf)
   const cleanBase64 = base64Data.replace(/^data:(.*);base64,/, "");
@@ -49,89 +49,47 @@ export const parseScheduleFile = async (base64Data: string, mimeType: string): P
   const prompt = systemPrompt(mimeType); // Usamos la función del prompt aquí
 
   try {
-    // Compatibility: some CDN builds expose models.generateContent instead of getGenerativeModel
-    const useNewApi = typeof (ai as any).getGenerativeModel === "function";
+    const model = ai.getGenerativeModel({
+      model: "gemini-1.5-flash",
+      generationConfig: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            faculty: { type: Type.STRING },
+            academic_period: { type: Type.STRING },
+            sessions: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  subject: { type: Type.STRING },
+                  subject_faculty: { type: Type.STRING },
+                  day: { type: Type.STRING, enum: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
+                  startTime: { type: Type.STRING },
+                  endTime: { type: Type.STRING },
+                  teacher: { type: Type.STRING },
+                  location: { type: Type.STRING },
+                },
+                required: ["subject", "subject_faculty", "day", "startTime", "endTime", "teacher", "location"],
+              },
+            },
+          },
+        },
+      },
+    });
 
-    const response = useNewApi
-      ? await (async () => {
-          const model = (ai as any).getGenerativeModel({
-            model: "gemini-1.5-flash",
-            generationConfig: {
-              responseMimeType: "application/json",
-              responseSchema: {
-                type: Type.OBJECT,
-                properties: {
-                  faculty: { type: Type.STRING },
-                  academic_period: { type: Type.STRING },
-                  sessions: {
-                    type: Type.ARRAY,
-                    items: {
-                      type: Type.OBJECT,
-                      properties: {
-                        subject: { type: Type.STRING },
-                        subject_faculty: { type: Type.STRING },
-                        day: { type: Type.STRING, enum: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
-                        startTime: { type: Type.STRING },
-                        endTime: { type: Type.STRING },
-                        teacher: { type: Type.STRING },
-                        location: { type: Type.STRING },
-                      },
-                      required: ["subject", "subject_faculty", "day", "startTime", "endTime", "teacher", "location"],
-                    },
-                  },
-                },
-              },
-            },
-          });
-          const result = await model.generateContent({
-            contents: [{
-              role: "user",
-              parts: [
-                { inlineData: { mimeType, data: cleanBase64 } },
-                { text: prompt },
-              ],
-            }],
-          });
-          return result.response?.text?.() || "";
-        })()
-      : await (async () => {
-          const result = await (ai as any).models.generateContent({
-            model: "gemini-1.5-flash",
-            contents: {
-              parts: [
-                { inlineData: { mimeType, data: cleanBase64 } },
-                { text: prompt },
-              ],
-            },
-            config: {
-              responseMimeType: "application/json",
-              responseSchema: {
-                type: Type.OBJECT,
-                properties: {
-                  faculty: { type: Type.STRING },
-                  academic_period: { type: Type.STRING },
-                  sessions: {
-                    type: Type.ARRAY,
-                    items: {
-                      type: Type.OBJECT,
-                      properties: {
-                        subject: { type: Type.STRING },
-                        subject_faculty: { type: Type.STRING },
-                        day: { type: Type.STRING, enum: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
-                        startTime: { type: Type.STRING },
-                        endTime: { type: Type.STRING },
-                        teacher: { type: Type.STRING },
-                        location: { type: Type.STRING },
-                      },
-                      required: ["subject", "subject_faculty", "day", "startTime", "endTime", "teacher", "location"],
-                    },
-                  },
-                },
-              },
-            },
-          });
-          return (result as any).text || "";
-        })();
+    const result = await model.generateContent({
+      contents: [{
+        role: "user",
+        parts: [
+          { inlineData: { mimeType, data: cleanBase64 } },
+          { text: prompt },
+        ],
+      }],
+    });
+
+    const response = result.response?.text?.() || "";
 
     if (!response) {
       throw new Error("La respuesta del modelo está vacía.");
