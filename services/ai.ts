@@ -50,7 +50,7 @@ export const parseScheduleFile = async (base64Data: string, mimeType: string): P
 
   try {
     const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash-latest",
+      model: "gemini-1.5-flash-8b",
       generationConfig: {
         responseMimeType: "application/json",
         responseSchema: {
