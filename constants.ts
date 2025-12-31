@@ -19,10 +19,10 @@ const getEnvVar = (key: string) => {
   return "";
 };
 
-// Prefer environment variables; allow browser overrides via localStorage only for Google client ID
-export const SUPABASE_URL = getEnvVar("VITE_SUPABASE_URL") || "";
-export const SUPABASE_KEY = getEnvVar("VITE_SUPABASE_KEY") || "";
-export const API_KEY = getEnvVar("VITE_GEMINI_API_KEY") || "";
+// Prefer environment variables directly for Vite static analysis
+export const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "";
+export const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_KEY || "";
+export const API_KEY = import.meta.env.VITE_GEMINI_API_KEY || "";
 
 export const FEATURES = {
   GUEST: ['UPLOAD', 'PROCESS', 'RESOLVE_CONFLICT'],
