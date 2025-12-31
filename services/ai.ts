@@ -1,4 +1,4 @@
-import { GoogleGenAI, Type } from "@google/genai";
+import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
 import { ClassSession } from "../types"; 
 import { API_KEY } from "../constants";
 
@@ -40,11 +40,8 @@ export const parseScheduleFile = async (base64Data: string, mimeType: string): P
     throw new Error("Falta la clave API de Gemini.");
   }
 
-  // Initialize client correctly for @google/genai SDK
-  const ai = new GoogleGenAI({ 
-    apiKey,
-    apiVersion: 'v1' 
-  });
+  // Initialize client correctly for @google/generative-ai SDK
+  const genAI = new GoogleGenerativeAI(apiKey);
 
   // Remove data URL prefix (works for image/* and application/pdf)
   const cleanBase64 = base64Data.replace(/^data:(.*);base64,/, "");
@@ -52,34 +49,27 @@ export const parseScheduleFile = async (base64Data: string, mimeType: string): P
   const prompt = systemPrompt(mimeType); 
 
   try {
-    const result = await ai.models.generateContent({
+    const model = genAI.getGenerativeModel({
       model: "gemini-1.5-flash",
-      contents: [{
-        role: "user",
-        parts: [
-          { inlineData: { mimeType, data: cleanBase64 } },
-          { text: prompt },
-        ],
-      }],
-      config: {
+      generationConfig: {
         responseMimeType: "application/json",
         responseSchema: {
-          type: Type.OBJECT,
+          type: SchemaType.OBJECT,
           properties: {
-            faculty: { type: Type.STRING },
-            academic_period: { type: Type.STRING },
+            faculty: { type: SchemaType.STRING },
+            academic_period: { type: SchemaType.STRING },
             sessions: {
-              type: Type.ARRAY,
+              type: SchemaType.ARRAY,
               items: {
-                type: Type.OBJECT,
+                type: SchemaType.OBJECT,
                 properties: {
-                  subject: { type: Type.STRING },
-                  subject_faculty: { type: Type.STRING },
-                  day: { type: Type.STRING, enum: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
-                  startTime: { type: Type.STRING },
-                  endTime: { type: Type.STRING },
-                  teacher: { type: Type.STRING },
-                  location: { type: Type.STRING },
+                  subject: { type: SchemaType.STRING },
+                  subject_faculty: { type: SchemaType.STRING },
+                  day: { type: SchemaType.STRING, enum: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
+                  startTime: { type: SchemaType.STRING },
+                  endTime: { type: SchemaType.STRING },
+                  teacher: { type: SchemaType.STRING },
+                  location: { type: SchemaType.STRING },
                 },
                 required: ["subject", "subject_faculty", "day", "startTime", "endTime", "teacher", "location"],
               },
@@ -89,7 +79,12 @@ export const parseScheduleFile = async (base64Data: string, mimeType: string): P
       },
     });
 
-    const response = result.value?.text?.() || (result as any).response?.text?.() || "";
+    const result = await model.generateContent([
+      { inlineData: { mimeType, data: cleanBase64 } },
+      { text: prompt },
+    ]);
+
+    const response = result.response.text();
 
     if (!response) {
       throw new Error("La respuesta del modelo está vacía.");
