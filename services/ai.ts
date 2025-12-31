@@ -40,18 +40,28 @@ export const parseScheduleFile = async (base64Data: string, mimeType: string): P
     throw new Error("Falta la clave API de Gemini.");
   }
 
-  // Initialize client correctly with the string API_KEY
-  const ai = new GoogleGenAI(apiKey);
+  // Initialize client correctly for @google/genai SDK
+  const ai = new GoogleGenAI({ 
+    apiKey,
+    apiVersion: 'v1' 
+  });
 
   // Remove data URL prefix (works for image/* and application/pdf)
   const cleanBase64 = base64Data.replace(/^data:(.*);base64,/, "");
   
-  const prompt = systemPrompt(mimeType); // Usamos la función del prompt aquí
+  const prompt = systemPrompt(mimeType); 
 
   try {
-    const model = ai.getGenerativeModel({
+    const result = await ai.models.generateContent({
       model: "gemini-1.5-flash",
-      generationConfig: {
+      contents: [{
+        role: "user",
+        parts: [
+          { inlineData: { mimeType, data: cleanBase64 } },
+          { text: prompt },
+        ],
+      }],
+      config: {
         responseMimeType: "application/json",
         responseSchema: {
           type: Type.OBJECT,
@@ -79,17 +89,7 @@ export const parseScheduleFile = async (base64Data: string, mimeType: string): P
       },
     });
 
-    const result = await model.generateContent({
-      contents: [{
-        role: "user",
-        parts: [
-          { inlineData: { mimeType, data: cleanBase64 } },
-          { text: prompt },
-        ],
-      }],
-    });
-
-    const response = result.response?.text?.() || "";
+    const response = result.value?.text?.() || (result as any).response?.text?.() || "";
 
     if (!response) {
       throw new Error("La respuesta del modelo está vacía.");
