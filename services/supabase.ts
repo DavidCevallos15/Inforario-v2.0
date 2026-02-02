@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { SUPABASE_URL as DEFAULT_SUPABASE_URL, SUPABASE_KEY as DEFAULT_SUPABASE_KEY } from '../constants';
 import { UserProfile, Schedule } from '../types';
+import { logWarning, logError } from '../lib/logger';
 
 // --- Client Initialization ---
 
@@ -53,7 +54,7 @@ let client;
 try {
   client = isConfigured ? createClient(activeUrl, activeKey) : null;
 } catch (e) {
-  console.warn("Supabase client initialization failed:", e);
+  logWarning("Supabase Client", "Initialization failed");
   client = null;
 }
 
@@ -183,7 +184,7 @@ export const deleteSchedule = async (scheduleId: string) => {
 
     if (error) throw error;
   } catch (err: any) {
-    console.error("Delete error:", err);
+    logError("Delete Schedule", err);
     // Handle Supabase "Invalid login credentials" which happens if the user was deleted or token revoked
     if (err.message && (err.message.includes("Invalid login credentials") || err.message.includes("JWT"))) {
         throw new Error("Credenciales inválidas o sesión expirada. Por favor cierra sesión y vuelve a ingresar.");

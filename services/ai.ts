@@ -1,6 +1,7 @@
 import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
 import { ClassSession } from "../types"; 
 import { API_KEY } from "../constants";
+import { logError } from "../lib/logger";
 
 interface ParseResult {
   sessions: ClassSession[];
@@ -36,7 +37,7 @@ export const parseScheduleFile = async (base64Data: string, mimeType: string): P
   const apiKey = API_KEY;
 
   if (!apiKey) {
-    console.error("API Key is missing");
+    logError("AI Service", "API Key is missing");
     throw new Error("Falta la clave API de Gemini.");
   }
 
@@ -50,7 +51,7 @@ export const parseScheduleFile = async (base64Data: string, mimeType: string): P
 
   try {
     const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash-exp",
+      model: "gemini-1.5-flash",
       generationConfig: {
         responseMimeType: "application/json",
         responseSchema: {
@@ -92,22 +93,9 @@ export const parseScheduleFile = async (base64Data: string, mimeType: string): P
 
     const rawData = JSON.parse(response);
 
-    // Polyfill UUID for older runtimes/browsers
-    const uuid = (() => {
-      if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
-        return crypto.randomUUID.bind(crypto);
-      }
-      // Fallback: RFC4122-ish random
-      return () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
-        const r = (Math.random() * 16) | 0;
-        const v = c === 'x' ? r : (r & 0x3) | 0x8;
-        return v.toString(16);
-      });
-    })();
-
     // Map sessions to our internal ID structure
     const processedSessions = (rawData.sessions || []).map((item: any) => ({
-      id: uuid(),
+      id: crypto.randomUUID(),
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       ...(({ type, ...rest }) => rest)(item), // Aseguramos que 'type' no se incluya
       conflict: false, // Default
@@ -121,7 +109,7 @@ export const parseScheduleFile = async (base64Data: string, mimeType: string): P
     };
 
   } catch (error: any) {
-    console.error("Gemini Parse Error:", error?.message || error, error);
+    logError("Gemini Parse", error);
     throw new Error(error?.message || "Error al analizar el horario. Por favor asegúrate de que el archivo sea legible y contenga un horario válido.");
   }
 };

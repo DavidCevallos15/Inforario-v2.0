@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Mail, Lock, Eye, EyeOff, User, GraduationCap, Check, ArrowLeft, AlertCircle } from 'lucide-react';
 import { signInWithEmail, signUpWithEmail, resetPasswordForEmail, isSupabaseConfigured } from '../services/supabase';
+import { logError } from '../lib/logger';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -98,7 +99,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLogin }) => {
         setSuccessMsg("Si el correo existe, recibirás un enlace de recuperación.");
       }
     } catch (err: any) {
-      console.error(err);
+      logError('Auth Action', err);
       if (err.message.includes("User already registered")) {
         setError("Este correo ya está registrado. Por favor, inicia sesión.");
       } else if (err.message.includes("Invalid login")) {

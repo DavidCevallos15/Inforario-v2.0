@@ -1,25 +1,6 @@
 export const MOCK_USER_ID = "guest-user-id";
 
-// Safe env access that works in Vite (import.meta.env) and Node (process.env)
-const getEnvVar = (key: string) => {
-  try {
-    if (typeof import.meta !== "undefined" && (import.meta as any).env) {
-      return (import.meta as any).env[key];
-    }
-  } catch (e) {
-    // ignore
-  }
-  try {
-    if (typeof process !== "undefined" && process.env) {
-      return process.env[key];
-    }
-  } catch (e) {
-    // ignore
-  }
-  return "";
-};
-
-// Prefer environment variables directly for Vite static analysis
+// Environment variables for Vite
 export const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "";
 export const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_KEY || "";
 export const API_KEY = import.meta.env.VITE_GEMINI_API_KEY || "";

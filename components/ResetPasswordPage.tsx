@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Lock, Eye, EyeOff, Check, AlertCircle, GraduationCap, KeyRound } from 'lucide-react';
 import { supabase } from '../services/supabase';
+import { logError } from '../lib/logger';
 
 interface ResetPasswordPageProps {
   onComplete: () => void;
@@ -62,7 +63,7 @@ const ResetPasswordPage: React.FC<ResetPasswordPageProps> = ({ onComplete }) => 
         onComplete();
       }, 2500);
     } catch (err: any) {
-      console.error('Password update error:', err);
+      logError('Password Update', err);
       if (err.message?.includes('same_password')) {
         setError('La nueva contraseña debe ser diferente a la anterior.');
       } else if (err.message?.includes('weak_password')) {

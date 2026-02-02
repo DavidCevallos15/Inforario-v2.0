@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { supabase, getUserSchedules, getScheduleById, deleteSchedule, saveScheduleToDB } from './services/supabase';
 import { parseScheduleFile } from './services/ai';
+import { logError, logWarning } from './lib/logger';
 // Google Calendar integration removed per request
 import { UserProfile, Schedule, AppView, ClassSession, Feature, DAYS, ScheduleTheme } from './types';
 import { FEATURES, API_KEY } from './constants';
@@ -169,14 +170,14 @@ const App: React.FC = () => {
 
         // second getSession call removed to avoid redeclaration errors
       } catch (err: any) {
-        console.error('Auth init error:', err);
+        logError('Auth Init', err);
         // If refresh token invalid, force sign out and clear session state so user can re-login
         const msg = err?.message || '';
         if (msg.includes('Refresh Token') || msg.includes('Invalid Refresh Token') || msg.includes('token not found')) {
           try {
             await supabase.auth.signOut();
           } catch (e) {
-            console.warn('signOut failed during refresh-token handling', e);
+            logWarning('Auth Cleanup', 'signOut failed during refresh-token handling');
           }
           try {
             // Try remove common supabase auth keys from localStorage to fully clear client state
@@ -222,7 +223,7 @@ const App: React.FC = () => {
       const data = await getUserSchedules(userId);
       setSavedSchedules(data);
     } catch (error: any) {
-      console.error("Error fetching schedules:", error?.message || error, error);
+      logError("Fetch Schedules", error);
       // Surface minimal info to user to debug 400s
       alert("No se pudieron cargar horarios guardados. Verifica las credenciales de Supabase y que la tabla 'schedules' exista con RLS correcta.");
     }
@@ -297,7 +298,7 @@ const App: React.FC = () => {
                 fetchSchedules(user.id); // Refresh list
               }
             } catch (saveError) {
-              console.error("Auto-save failed:", saveError);
+              logError("Auto-save", saveError);
             }
           }
           
@@ -308,14 +309,14 @@ const App: React.FC = () => {
           
         } catch (err: any) {
           alert(err.message || "No se pudo procesar el documento.");
-          console.error(err);
+          logError("Upload Processing", err);
         } finally {
           setIsProcessing(false);
           setProcessingStep(null);
         }
       };
     } catch (e) {
-      console.error(e);
+      logError("File Read", e);
       setIsProcessing(false);
       alert("Error al leer el archivo.");
     }
@@ -425,7 +426,7 @@ const App: React.FC = () => {
         setView(AppView.DASHBOARD);
       }
     } catch (e) {
-      console.error(e);
+      logError("Load Schedule", e);
       alert("Error al abrir el horario.");
     }
   };
@@ -437,7 +438,7 @@ const App: React.FC = () => {
         // Optimistic update: Remove from UI immediately so it reflects the deletion instantly
         setSavedSchedules(prev => prev.filter(s => s.id !== id));
       } catch (e) {
-        console.error("Error removing schedule", e);
+        logError("Delete Schedule", e);
         alert("No se pudo eliminar el horario. Por favor intente de nuevo.");
       }
     }
@@ -449,7 +450,7 @@ const App: React.FC = () => {
         await Promise.all(ids.map(id => deleteSchedule(id)));
         if (user) fetchSchedules(user.id);
       } catch (e) {
-        console.error(e);
+        logError("Bulk Delete", e);
         alert("Ocurrió un error al eliminar los horarios.");
       }
     }
@@ -785,7 +786,7 @@ const App: React.FC = () => {
         doc.save(fileName);
 
     } catch (err) {
-      console.error("PDF Generation Error:", err);
+      logError("PDF Generation", err);
       alert("No se pudo generar el PDF.");
     } finally {
       setIsExporting(false);
@@ -828,7 +829,7 @@ const App: React.FC = () => {
             ) : (
               <button 
                 onClick={() => setAuthModalOpen(true)}
-                className="px-6 py-2.5 bg-primary text-primary-foreground text-sm font-bold rounded-xl transition-transform transition-shadow duration-150 ease-out shadow-none hover:bg-[rgb(0,240,255)] hover:shadow-[0_0_20px_rgba(0,240,255,0.28)] hover:-translate-y-[2px]"
+                className="px-6 py-2.5 bg-primary text-primary-foreground text-sm font-bold rounded-xl transition-all duration-150 ease-out shadow-none hover:bg-[rgb(0,240,255)] hover:shadow-[0_0_20px_rgba(0,240,255,0.28)] hover:-translate-y-[2px]"
               >
                 Acceso Estudiante
               </button>
@@ -1007,7 +1008,7 @@ const App: React.FC = () => {
                         <button
                           onClick={() => handleDownload()}
                           disabled={isExporting}
-                          className="flex-1 lg:flex-none justify-center px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-bold flex items-center gap-2 transition-transform transition-shadow duration-150 ease-out shadow-none hover:bg-[rgb(0,240,255)] hover:shadow-[0_0_18px_rgba(0,240,255,0.3)] hover:-translate-y-[2px] disabled:opacity-70 disabled:cursor-not-allowed"
+                          className="flex-1 lg:flex-none justify-center px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-bold flex items-center gap-2 transition-all duration-150 ease-out shadow-none hover:bg-[rgb(0,240,255)] hover:shadow-[0_0_18px_rgba(0,240,255,0.3)] hover:-translate-y-[2px] disabled:opacity-70 disabled:cursor-not-allowed"
                         >
                           {isExporting ? (
                             <RefreshCw size={16} className="animate-spin" />
